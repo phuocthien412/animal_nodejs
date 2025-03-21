@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Động vật </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <style>
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        .animal-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .animal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .animal-image {
+            max-width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .btn-submit {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 30px;
+        }
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .pagination-info {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #6c757d;
+        }
+        .avatar-gallery {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .avatar-thumbnail {
+            height: 120px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .card {
+            margin-bottom: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .card.border-primary {
+            border-width: 2px;
+        }
+        .card-footer {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .avatar-preview {
+            max-height: 150px;
+            max-width: 100%;
+            display: block;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        .clear-avatar-btn {
+            margin-top: 5px;
+        }
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 150px;
+        }
+        .empty-avatars {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Header Section -->
+        <div class="header text-center">
+            <div class="container">
+                <h1>{{title}}</h1>
+                <p class="lead">Hệ thống quản lý động vật</p>
+                <a href="/" class="btn btn-primary btn-action">
+                    <i class="fas fa-arrow-left"></i> Quay lại trang chủ
+                </a>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Add Animal Form -->
+            <div class="form-section">
+                <h3 class="mb-4"><i class="fas fa-plus-circle"></i> Thêm Động vật mới</h3>
+                <form @submit.prevent="addAnimal" enctype="multipart/form-data" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Mã Động vật</label>
+                        <input type="text" class="form-control" v-model="newAnimal.id_animal" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tên</label>
+                        <input type="text" class="form-control" v-model="newAnimal.name" required>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Avatar</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" @change="handleFileUpload($event, 'avatar')" accept="image/*">
+                                <button class="btn btn-primary" type="button" @click="showAvatarGallery = !showAvatarGallery">
+                                    <i class="fas fa-images"></i> Thư viện
+                                </button>
+                            </div>
+                            <div v-if="newAnimal.avatar" class="mt-2">
+                                <div v-if="typeof newAnimal.avatar === 'string'" class="text-center">
+                                    <img :src="newAnimal.avatar" class="avatar-preview" alt="Preview">
+                                    <div class="text-muted small">Ảnh đã chọn từ thư viện</div>
+                                    <button class="btn btn-sm btn-outline-danger clear-avatar-btn" @click="clearAvatar">
+                                        <i class="fas fa-times"></i> Xóa
+                                    </button>
+                                </div>
+                                <div v-else class="text-center">
+                                    <img :src="avatarPreviewUrl" class="avatar-preview" alt="Preview">
+                                    <div class="text-muted small">Ảnh đã tải lên</div>
+                                    <button class="btn btn-sm btn-outline-danger clear-avatar-btn" @click="clearAvatar">
+                                        <i class="fas fa-times"></i> Xóa
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Avatar Gallery -->
+                            <div v-if="showAvatarGallery">
+                                <div class="avatar-gallery">
+                                    <div v-if="isLoadingAvatars" class="loading-spinner">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                    <div v-else-if="availableAvatars.length === 0" class="empty-avatars">
+                                        <i class="fas fa-image fa-2x mb-2"></i>
+                                        <p>Không có ảnh nào trong thư viện.</p>
+                                    </div>
+                                    <div v-else>
+                                        <p class="text-muted small">Có {{availableAvatars.length}} ảnh có sẵn. Bấm vào ảnh để chọn.</p>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control form-control-sm" placeholder="Tìm kiếm ảnh..." v-model="searchQuery">
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" @click="searchQuery = ''">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                        <div class="row mt-2">
+                                            <div v-for="avatar in filteredAvatars" class="col-md-4 col-6">
+                                                <div class="card" 
+                                                    :class="{'border-primary': newAnimal.avatar === avatar.path}"
+                                                    @click="selectAvatar(avatar.path)">
+                                                    <img :src="avatar.path" class="avatar-thumbnail" alt="Avatar" 
+                                                         onerror="this.src='/img/image-error.png'; this.onerror=null;">
+                                                    <div class="card-footer">
+                                                        {{avatar.filename}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Hình QR 3D</label>
+                        <input type="file" class="form-control" @change="handleFileUpload($event, 'imgqr3d')" accept="image/*">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Hình nơi sinh sống</label>
+                        <input type="file" class="form-control" @change="handleFileUpload($event, 'noi_sinh_song_image')" accept="image/*">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Giới thiệu</label>
+                        <textarea class="form-control" v-model="newAnimal.gioi_thieu_text" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Ngoại hình</label>
+                        <textarea class="form-control" v-model="newAnimal.ngoai_hinh_text" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Mô tả nơi sinh sống</label>
+                        <textarea class="form-control" v-model="newAnimal.noi_sinh_song_text" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Mã Loài</label>
+                        <input type="text" class="form-control" v-model="newAnimal.classanimals_id">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-submit">
+                            <i class="fas fa-save"></i> Thêm Động vật
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Animal List -->
+            <h3 class="mb-4"><i class="fas fa-list"></i> Danh sách Động vật</h3>
+            
+            <!-- Pagination Information -->
+            <div class="pagination-info" v-if="pagination">
+                <p>Hiển thị {{animalList.length}} động vật trên tổng số {{pagination.total}} (Trang {{pagination.currentPage}}/{{pagination.totalPages}})</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4" v-for="animal in animalList" :key="animal.id_animal">
+                    <div class="animal-card p-3">
+                        <img v-if="animal.avatar" :src="animal.avatar" loading="lazy" alt="Avatar" class="animal-image mb-3">
+                        <h4>{{ animal.name }}</h4>
+                        <p class="text-muted">ID: {{ animal.id_animal }}</p>
+                        <div class="mb-3">
+                            <strong>Giới thiệu:</strong>
+                            <p>{{ animal.gioi_thieu_text }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Ngoại hình:</strong>
+                            <p>{{ animal.ngoai_hinh_text }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Nơi sinh sống:</strong>
+                            <p>{{ animal.noi_sinh_song_text }}</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-info btn-sm" @click="viewAnimal(animal)">
+                                <i class="fas fa-eye"></i> Xem
+                            </button>
+                            <button class="btn btn-warning btn-sm" @click="editAnimal(animal)">
+                                <i class="fas fa-edit"></i> Sửa
+                            </button>
+                            <button class="btn btn-danger btn-sm" @click="deleteAnimal(animal.id_animal)">
+                                <i class="fas fa-trash"></i> Xóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading indicator -->
+            <div v-if="isLoading" class="text-center my-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+                <p class="mt-2">Đang tải dữ liệu...</p>
+            </div>
+            
+            <!-- Pagination controls -->
+            <div class="pagination-container">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li class="page-item" :class="{ disabled: pagination && !pagination.hasPrevPage }">
+                            <a class="page-link" href="#" @click.prevent="goToPage(1)">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item" :class="{ disabled: pagination && !pagination.hasPrevPage }">
+                            <a class="page-link" href="#" @click.prevent="goToPage(pagination ? pagination.currentPage - 1 : 1)">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                        
+                        <!-- Page number buttons -->
+                        <li v-for="pageNum in displayedPages" :key="pageNum" class="page-item" :class="{ active: pagination && pagination.currentPage === pageNum }">
+                            <a class="page-link" href="#" @click.prevent="goToPage(pageNum)">{{ pageNum }}</a>
+                        </li>
+                        
+                        <li class="page-item" :class="{ disabled: pagination && !pagination.hasNextPage }">
+                            <a class="page-link" href="#" @click.prevent="goToPage(pagination ? pagination.currentPage + 1 : 1)">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item" :class="{ disabled: pagination && !pagination.hasNextPage }">
+                            <a class="page-link" href="#" @click.prevent="goToPage(pagination ? pagination.totalPages : 1)">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <!-- Page size selector -->
+            <div class="text-center mb-4">
+                <div class="btn-group">
+                    <button class="btn" :class="limit === 5 ? 'btn-primary' : 'btn-outline-primary'" @click="changePageSize(5)">5</button>
+                    <button class="btn" :class="limit === 10 ? 'btn-primary' : 'btn-outline-primary'" @click="changePageSize(10)">10</button>
+                    <button class="btn" :class="limit === 20 ? 'btn-primary' : 'btn-outline-primary'" @click="changePageSize(20)">20</button>
+                </div>
+                <span class="ms-2">số động vật trên mỗi trang</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                title: "Quản lý Động vật",
+                animalList: [],
+                pagination: null,
+                isLoading: false,
+                page: 1,
+                limit: 10,
+                newAnimal: {
+                    id_animal: '',
+                    name: '',
+                    avatar: null,
+                    imgqr3d: null,
+                    noi_sinh_song_image: null,
+                    gioi_thieu_text: '',
+                    ngoai_hinh_text: '',
+                    noi_sinh_song_text: '',
+                    classanimals_id: ''
+                },
+                showAvatarGallery: false,
+                isLoadingAvatars: false,
+                availableAvatars: [],
+                avatarPreviewUrl: null,
+                searchQuery: ''
+            },
+            computed: {
+                displayedPages() {
+                    if (!this.pagination) return [1];
+                    
+                    const current = this.pagination.currentPage;
+                    const total = this.pagination.totalPages;
+                    const maxButtons = 5;
+                    
+                    if (total <= maxButtons) {
+                        // Hiển thị tất cả các trang nếu tổng số trang ít hơn hoặc bằng maxButtons
+                        return Array.from({ length: total }, (_, i) => i + 1);
+                    }
+                    
+                    // Luôn hiển thị trang hiện tại ở giữa khi có thể
+                    let start = Math.max(1, current - Math.floor(maxButtons / 2));
+                    let end = start + maxButtons - 1;
+                    
+                    // Điều chỉnh nếu end vượt quá tổng số trang
+                    if (end > total) {
+                        end = total;
+                        start = Math.max(1, end - maxButtons + 1);
+                    }
+                    
+                    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+                },
+                filteredAvatars() {
+                    if (!this.availableAvatars) return [];
+                    return this.availableAvatars.filter(avatar => avatar.filename.toLowerCase().includes(this.searchQuery.toLowerCase()));
+                }
+            },
+            methods: {
+                handleFileUpload: function(event, field) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.newAnimal[field] = file;
+                        
+                        // Tạo URL preview cho avatar
+                        if (field === 'avatar') {
+                            if (this.avatarPreviewUrl) {
+                                URL.revokeObjectURL(this.avatarPreviewUrl);
+                            }
+                            this.avatarPreviewUrl = URL.createObjectURL(file);
+                        }
+                    }
+                },
+                addAnimal: async function() {
+                    try {
+                        const formData = new FormData();
+                        
+                        // Xử lý các trường dữ liệu text
+                        for (const key in this.newAnimal) {
+                            // Nếu là avatar và không phải file (là đường dẫn), bỏ qua
+                            if (key === 'avatar' && !(this.newAnimal[key] instanceof File)) {
+                                continue;
+                            }
+                            // Các trường dữ liệu khác
+                            else if (this.newAnimal[key] !== null && this.newAnimal[key] !== undefined) {
+                                formData.append(key, this.newAnimal[key]);
+                            }
+                        }
+                        
+                        // Nếu avatar là đường dẫn, thêm vào dưới dạng avatar_path
+                        if (typeof this.newAnimal.avatar === 'string' && this.newAnimal.avatar.startsWith('/Animal/Avatar/')) {
+                            formData.append('avatar_path', this.newAnimal.avatar);
+                        }
+
+                        // Gọi API thêm động vật mới
+                        const response = await fetch('/api/animal', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (response.ok) {
+                            const result = await response.json();
+                            this.loadAnimals();
+                            // Reset form
+                            this.newAnimal = {
+                                id_animal: '',
+                                name: '',
+                                avatar: null,
+                                imgqr3d: null,
+                                noi_sinh_song_image: null,
+                                gioi_thieu_text: '',
+                                ngoai_hinh_text: '',
+                                noi_sinh_song_text: '',
+                                classanimals_id: ''
+                            };
+                            this.showAvatarGallery = false;
+                            // Reset avatar preview URL
+                            if (this.avatarPreviewUrl) {
+                                URL.revokeObjectURL(this.avatarPreviewUrl);
+                                this.avatarPreviewUrl = null;
+                            }
+                            alert('Thêm động vật thành công!');
+                        } else {
+                            const error = await response.json();
+                            alert('Lỗi: ' + error.message);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Đã xảy ra lỗi khi thêm động vật mới');
+                    }
+                },
+                loadAnimals: async function() {
+                    try {
+                        const response = await fetch('/api/animal-list');
+                        const data = await response.json();
+                        console.log('Loaded animals:', data);
+                        this.animalList = data;
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                },
+                loadAvailableAvatars: async function() {
+                    try {
+                        this.isLoadingAvatars = true;
+                        const response = await fetch('/api/available-avatars');
+                        if (response.ok) {
+                            this.availableAvatars = await response.json();
+                        } else {
+                            console.error('Error loading avatars');
+                            this.availableAvatars = [];
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.availableAvatars = [];
+                    } finally {
+                        this.isLoadingAvatars = false;
+                    }
+                },
+                goToPage: function(page) {
+                    if (page < 1 || (this.pagination && page > this.pagination.totalPages)) {
+                        return;
+                    }
+                    
+                    this.page = page;
+                    this.loadAnimals();
+                    // Scroll lên đầu danh sách
+                    window.scrollTo({
+                        top: document.querySelector('.animal-list').offsetTop - 20,
+                        behavior: 'smooth'
+                    });
+                },
+                changePageSize: function(size) {
+                    this.limit = size;
+                    this.page = 1; // Reset về trang đầu tiên
+                    this.loadAnimals();
+                },
+                viewAnimal: function(animal) {
+                    window.location.href = `/animal/${animal.id_animal}`;
+                },
+                editAnimal: function(animal) {
+                    window.location.href = `/animal/edit/${animal.id_animal}`;
+                },
+                deleteAnimal: async function(id) {
+                    if(confirm('Bạn có chắc chắn muốn xóa động vật này?')) {
+                        try {
+                            this.isLoading = true;
+                            const response = await fetch(`/api/animal/${id}`, {
+                                method: 'DELETE'
+                            });
+                            
+                            if (response.ok) {
+                                // Nếu đang ở trang cuối và chỉ còn 1 item, chuyển về trang trước đó
+                                if (this.animalList.length === 1 && this.page > 1 && this.pagination.currentPage === this.pagination.totalPages) {
+                                    this.page--;
+                                }
+                                
+                                this.loadAnimals();
+                                alert('Xóa động vật thành công!');
+                            } else {
+                                const error = await response.json();
+                                alert('Lỗi: ' + error.message);
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            alert('Đã xảy ra lỗi khi xóa động vật');
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    }
+                },
+                toggleAvatarGallery: function() {
+                    this.showAvatarGallery = !this.showAvatarGallery;
+                    if (this.showAvatarGallery && this.availableAvatars.length === 0) {
+                        this.loadAvailableAvatars();
+                    }
+                },
+                selectAvatar: function(path) {
+                    // Gán đường dẫn avatar đã chọn
+                    this.newAnimal.avatar = path;
+                },
+                clearAvatar: function() {
+                    this.newAnimal.avatar = null;
+                    if (this.avatarPreviewUrl) {
+                        URL.revokeObjectURL(this.avatarPreviewUrl);
+                        this.avatarPreviewUrl = null;
+                    }
+                }
+            },
+            mounted: function() {
+                this.loadAnimals();
+                // Tải danh sách ảnh có sẵn ngay khi trang được load
+                this.loadAvailableAvatars();
+            }
+        });
+    </script>
+</body>
+</html> 

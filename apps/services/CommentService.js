@@ -88,16 +88,16 @@ class CommentService {
         }
     }
 
-    async getCommentsByUserId(userId) {
-        try {
-            const comments = await this.commentcollection
-                .find({ user_id: userId  })
-                .toArray();
-            return comments;
-        } catch (error) {
-            throw new Error("Lỗi khi lấy bình luận theo user_id: " + error.message);
-        }
-    }
+    // async getCommentsByUserId(userId) {
+    //     try {
+    //         const comments = await this.commentcollection
+    //             .find({ user_id: userId  })
+    //             .toArray();
+    //         return comments;
+    //     } catch (error) {
+    //         throw new Error("Lỗi khi lấy bình luận theo user_id: " + error.message);
+    //     }
+    // }
 
     async getCommentsByPostId(postId) {
         try {
@@ -110,25 +110,25 @@ class CommentService {
         }
     }
 
-    async getCommentsByUserAndPost(userId, postId) {
-        try {
-            let filter = {
-                post_id: postId,
-                user_id: userId
-            };
+    // async getCommentsByUserAndPost(userId, postId) {
+    //     try {
+    //         let filter = {
+    //             post_id: postId,
+    //             user_id: userId
+    //         };
 
-            if (ObjectId.isValid(userId)) {
-                filter.user_id = new ObjectId(userId);
-            }
+    //         if (ObjectId.isValid(userId)) {
+    //             filter.user_id = new ObjectId(userId);
+    //         }
             
-            const comments = await this.commentcollection
-                .find(filter)
-                .toArray();
-            return comments;
-        } catch (error) {
-            throw new Error("Lỗi khi lấy bình luận theo user_id và post_id: " + error.message);
-        }
-    }
+    //         const comments = await this.commentcollection
+    //             .find(filter)
+    //             .toArray();
+    //         return comments;
+    //     } catch (error) {
+    //         throw new Error("Lỗi khi lấy bình luận theo user_id và post_id: " + error.message);
+    //     }
+    // }
 
 }
 

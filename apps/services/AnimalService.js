@@ -93,6 +93,26 @@ class AnimalService {
             throw new Error("Lỗi khi xóa động vật: " + error.message);
         }
     }
+
+    // Lấy danh sách động vật có phân trang
+    async getPaginated(page, limit) {
+        try {
+            const skip = (page - 1) * limit;
+            const cursor = this.animalcollection.find().skip(skip).limit(limit);
+            return await cursor.toArray();
+        } catch (error) {
+            throw new Error("Lỗi khi lấy danh sách động vật phân trang: " + error.message);
+        }
+    }
+
+    // Đếm tổng số động vật
+    async countAnimals() {
+        try {
+            return await this.animalcollection.countDocuments();
+        } catch (error) {
+            throw new Error("Lỗi khi đếm số lượng động vật: " + error.message);
+        }
+    }
 }
 
 module.exports = AnimalService;

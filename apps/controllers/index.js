@@ -1,0 +1,1 @@
+router.use("/authenticate", require(__dirname + "/api/authenticatecontroller"));

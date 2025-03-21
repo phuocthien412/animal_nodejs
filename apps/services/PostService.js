@@ -31,27 +31,27 @@ class PostService {
         }
     }
 
-    async getPostsByUserId(userId) {
-        try {
-            if (!userId) {
-                throw new Error("user_id là bắt buộc");
-            }
+    // async getPostsByUserId(userId) {
+    //     try {
+    //         if (!userId) {
+    //             throw new Error("user_id là bắt buộc");
+    //         }
     
-            let filter = { user_id: userId };
-            if (ObjectId.isValid(userId)) {
-                filter = { user_id: new ObjectId(userId) };
-            }
+    //         let filter = { user_id: userId };
+    //         if (ObjectId.isValid(userId)) {
+    //             filter = { user_id: new ObjectId(userId) };
+    //         }
     
-            const posts = await this.postCollection.find(filter).toArray();
-            if (!posts || posts.length === 0) {
-                return [];
-            }
+    //         const posts = await this.postCollection.find(filter).toArray();
+    //         if (!posts || posts.length === 0) {
+    //             return [];
+    //         }
             
-            return posts;
-        } catch (error) {
-            throw new Error("Lỗi khi lấy bài viết của người dùng: " + error.message);
-        }
-    }
+    //         return posts;
+    //     } catch (error) {
+    //         throw new Error("Lỗi khi lấy bài viết của người dùng: " + error.message);
+    //     }
+    // }
 
     async createPost(postData) {
         try {

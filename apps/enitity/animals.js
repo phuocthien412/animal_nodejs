@@ -14,7 +14,20 @@ class animals {
         this.name = data.name || '';
         this.classanimals_id = data.classanimals_id || '';
     }
-
+    toJSON() {
+        return {
+            _id: this._id,
+            id_animal: this.id_animal,
+            name: this.name,
+            avatar: this.avatar,
+            gioi_thieu_text: this.gioi_thieu_text,
+            imgqr3d: this.imgqr3d,
+            ngoai_hinh_text: this.ngoai_hinh_text,
+            noi_sinh_song_image: this.noi_sinh_song_image,
+            noi_sinh_song_text: this.noi_sinh_song_text,
+            classanimals_id: this.classanimals_id
+        };
+    }
 }
 
 module.exports = animals;

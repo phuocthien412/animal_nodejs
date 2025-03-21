@@ -29,15 +29,15 @@ router.get("/post/:id", async function (req, res) {
     }
 });
 
-// Get posts by user id
-router.get("/user-posts/:userId", async function (req, res) {
-    try {
-        var posts = await postService.getPostsByUserId(req.params.userId);
-        res.json(posts);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+// // Get posts by user id
+// router.get("/user-posts/:userId", async function (req, res) {
+//     try {
+//         var posts = await postService.getPostsByUserId(req.params.userId);
+//         res.json(posts);
+//     } catch (error) {
+//         res.status(500).json({ message: error.message });
+//     }
+// });
 
 // Create new post
 router.post("/post", async function (req, res) {
@@ -83,16 +83,16 @@ router.delete("/post/:id", async function (req, res) {
 // });
 
 // Get post with user details
-router.get("/post-user/:id/", async function (req, res) {
-    try {
-        var post = await postService.getPostsByUserId(req.params.id);
-        if (!post) {
-            return res.status(404).json({ message: 'Cannot find post' });
-        }
-        res.json(post);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+// router.get("/post-user/:id/", async function (req, res) {
+//     try {
+//         var post = await postService.getPostsByUserId(req.params.id);
+//         if (!post) {
+//             return res.status(404).json({ message: 'Cannot find post' });
+//         }
+//         res.json(post);
+//     } catch (error) {
+//         res.status(500).json({ message: error.message });
+//     }
+// });
 
 module.exports = router;

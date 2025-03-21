@@ -3,5 +3,8 @@
         "username": "minhthien45678",
         "password": "Thienngo2003",
         "database": "danltw"
+    },
+    "jwt": {
+        "secret": "goK!pusp6ThEdURUtRenOwUhAsWUCLheBazl!uJLPlS8EbreWLdrupIwabRAsiBu"
     }
 }

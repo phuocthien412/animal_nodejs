@@ -7,7 +7,7 @@ class Post {
         this.title = data.title || '';
         this.image = data.image || '';
         // Thay đổi userId thành user_id để tham chiếu đến _id của User
-        this.user_id = data.user_id ? new ObjectId(data.user_id) : null;
+        // this.user_id = data.user_id ? new ObjectId(data.user_id) : null;
         // this.approvedBy = data.approvedBy ? new ObjectId(data.approvedBy) : null;
         // this.approvedAt = data.approvedAt || null;
         this.createdAt = data.createdAt || new Date();

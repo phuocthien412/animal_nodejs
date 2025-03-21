@@ -8,7 +8,7 @@ class Comment {
         this.chat_data = data.chat_data || '';
         this.date_time = data.date_time || new Date().toISOString();
         this.post_id = data.post_id || '';
-        this.user_id = data.user_id ? new ObjectId(data.user_id) : null;
+        // this.user_id = data.user_id ? new ObjectId(data.user_id) : null;
     }
 }
 

@@ -32,15 +32,15 @@ router.get("/comment/:id", async function (req, res) {
     }
 });
 
-// Get comments by user id
-router.get("/user-comments/:userId", async function (req, res) {
-    try {
-        var comments = await commentService.getCommentsByUserId(req.params.userId);
-        res.json(comments);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+// // Get comments by user id
+// router.get("/user-comments/:userId", async function (req, res) {
+//     try {
+//         var comments = await commentService.getCommentsByUserId(req.params.userId);
+//         res.json(comments);
+//     } catch (error) {
+//         res.status(500).json({ message: error.message });
+//     }
+// });
 
 // Get comments by post id
 router.get("/post-comments/:postId", async function (req, res) {
@@ -52,18 +52,18 @@ router.get("/post-comments/:postId", async function (req, res) {
     }
 });
 
-// Get comments by user and post
-router.get("/comments/:userId/:postId", async function (req, res) {
-    try {
-        var comments = await commentService.getCommentsByUserAndPost(
-            req.params.userId, 
-            req.params.postId
-        );
-        res.json(comments);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+// // Get comments by user and post
+// router.get("/comments/:userId/:postId", async function (req, res) {
+//     try {
+//         var comments = await commentService.getCommentsByUserAndPost(
+//             req.params.userId, 
+//             req.params.postId
+//         );
+//         res.json(comments);
+//     } catch (error) {
+//         res.status(500).json({ message: error.message });
+//     }
+// });
 
 // Create new comment
 router.post("/comment", async function (req, res) {
